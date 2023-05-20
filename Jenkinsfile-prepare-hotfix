@@ -39,10 +39,6 @@ pipeline {
 
         stage('Commit HOTFIX Branch') {
             steps {
-                 echo "POM_MAJOR_VERSION: ${env.POM_MAJOR_VERSION}"
-                echo "POM_MINOR_VERSION: ${env.POM_MINOR_VERSION}"
-                echo "POM_PATCH_VERSION: ${env.POM_PATCH_VERSION}"
-                echo "POM_MAVEN_QUALIFIER: ${env.POM_MAVEN_QUALIFIER}"
                  sh "git checkout hotfix/${env.POM_MAJOR_VERSION}.${env.POM_MINOR_VERSION}.${env.POM_MINOR_VERSION}" 
                  sh "git add pom.xml"    
                  sh 'git commit -m "Prepare hotfix"'

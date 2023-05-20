@@ -91,7 +91,7 @@ pipeline {
         stage('Create Git Tag') {
             steps {
                 sh "git checkout ${params.RELEASE_VERSION}"
-                sh "git tag ${params.RELEASE_VERSION}"
+                sh "git tag ${params.RELEASE_VERSION}-RC"
                 sh "git push origin --tags"
             }
         }
