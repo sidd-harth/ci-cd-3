@@ -36,7 +36,7 @@ then
 elif [[ $JOB_NAME == 'prepare-minor-release' ]]
 then
     git checkout develop;
-    git checkout -b release/$MAJOR_VERSION.$MINOR_VERSION$PATCH_VERSION develop;
+    git checkout -b release/$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION develop;
 else
     echo "Check Logs"
 fi

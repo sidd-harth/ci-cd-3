@@ -39,10 +39,10 @@ then
     git push --set-upstream origin hotfix/$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION; 
 elif [[ $JOB_NAME == 'prepare-minor-release' ]]
 then
-    git checkout release/$MAJOR_VERSION.$MINOR_VERSION;
+    git checkout release/$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION;
     git add pom.xml;
     git commit -m "Prepare release RC-0";
-    git push --set-upstream origin release/$MAJOR_VERSION.$MINOR_VERSION; 
+    git push --set-upstream origin release/$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION; 
 else
     echo "Check Logs"
 fi
