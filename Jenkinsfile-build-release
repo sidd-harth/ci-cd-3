@@ -16,7 +16,7 @@ pipeline {
     }
 
     parameters {
-        string( name: 'BRANCH', description: 'Name of the Branch to be built? (e.g. release/1.1.0)' )
+        string( name: 'BRANCH', description: 'Name of the Release Branch to be built? (e.g. release/1.1.0)' )
     }    
 
     stages {
