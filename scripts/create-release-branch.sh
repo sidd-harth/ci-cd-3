@@ -34,6 +34,7 @@ elif [[ $JOB_NAME == 'prepare-hotfix' ]]
 then
     git checkout -b hotfix/$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION main;
 elif [[ $JOB_NAME == 'prepare-minor-release' ]]
+then
     git checkout develop;
     git checkout -b release/$MAJOR_VERSION.$MINOR_VERSION$PATCH_VERSION develop;
 else
