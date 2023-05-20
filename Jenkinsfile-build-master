@@ -1,0 +1,58 @@
+pipeline {
+    agent any
+
+    tools {
+        maven 'M386'
+    }
+
+    environment {
+        POM_VERSION       = sh(script: "mvn help:evaluate -Dexpression='project.version' -q -DforceStdout", returnStdout: true).trim()
+        POM_MAJOR_VERSION = sh(script: "mvn help:evaluate -Dexpression='project.version' -q -DforceStdout |  cut -d. -f1", returnStdout: true).trim()
+        POM_MINOR_VERSION = sh(script: "mvn help:evaluate -Dexpression='project.version' -q -DforceStdout |  cut -d. -f2", returnStdout: true).trim()
+        POM_PATCH_VERSION = sh(script: "mvn help:evaluate -Dexpression='project.version' -q -DforceStdout |  cut -d. -f3 | cut -d- -f1", returnStdout: true).trim()
+        POM_MAVEN_QUALIFIER = sh(script: "mvn help:evaluate -Dexpression='project.version' -q -DforceStdout | cut -d- -f2", returnStdout: true).trim()
+    }
+       
+    stages {
+
+        stage('Echo Version') {
+            steps {
+                echo "POM_MAJOR_VERSION: ${env.POM_MAJOR_VERSION}"
+                echo "POM_MINOR_VERSION: ${env.POM_MINOR_VERSION}"
+                echo "POM_PATCH_VERSION: ${env.POM_PATCH_VERSION}"
+                echo "POM_MAVEN_QUALIFIER: ${env.POM_MAVEN_QUALIFIER}"
+            }
+        }
+
+        stage('Remove qualifier for Production') {
+            steps {
+                sh 'mvn build-helper:parse-version versions:set -DnewVersion=\\${parsedVersion.majorVersion}.\\${parsedVersion.minorVersion}.\\${parsedVersion.incrementalVersion} versions:commit'
+            }
+        }
+
+        stage('Deploy to Nexus') {
+            steps {
+                echo "mvn clean deploy"
+            }
+        }
+
+        stage('Commit to main Branch') {
+            steps {
+                 sh "git checkout main" 
+                 sh "git add pom.xml"    
+                 sh 'git commit -m "Removed qualifier for Productive version"'
+                 sh "git push origin"
+            }
+        }
+
+        stage('Create Git Tag') {
+            steps {
+                sh "git checkout main"
+                sh "git tag ${env.POM_MAJOR_VERSION}.${env.POM_MINOR_VERSION}.${env.POM_PATCH_VERSION}"
+                sh "git push origin --tags"
+            }
+        } 
+
+    }
+
+}

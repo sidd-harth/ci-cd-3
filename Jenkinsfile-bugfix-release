@@ -1,0 +1,63 @@
+pipeline {
+    agent any
+
+    tools {
+        maven 'M386'
+    }
+
+    environment {
+        POM_VERSION       = sh(script: "mvn help:evaluate -Dexpression='project.version' -q -DforceStdout", returnStdout: true).trim()
+        POM_MAJOR_VERSION = sh(script: "mvn help:evaluate -Dexpression='project.version' -q -DforceStdout |  cut -d. -f1", returnStdout: true).trim()
+        POM_MINOR_VERSION = sh(script: "mvn help:evaluate -Dexpression='project.version' -q -DforceStdout |  cut -d. -f2", returnStdout: true).trim()
+        POM_PATCH_VERSION = sh(script: "mvn help:evaluate -Dexpression='project.version' -q -DforceStdout |  cut -d. -f3 | cut -d- -f1", returnStdout: true).trim()
+        POM_MAVEN_QUALIFIER = sh(script: "mvn help:evaluate -Dexpression='project.version' -q -DforceStdout | cut -d- -f2", returnStdout: true).trim() 
+        VERSION_WITHOUT_BUILD_NUMBER = sh(script: "echo ${env.POM_MAJOR_VERSION}.${env.POM_MINOR_VERSION}.${env.POM_PATCH_VERSION}-${env.POM_MAVEN_QUALIFIER}", returnStdout: true).trim()
+        VERSION_BUILD_NUMBER = sh(script: "mvn help:evaluate -Dexpression='project.version' -q -DforceStdout | cut -d- -f3", returnStdout: true).trim()
+    }
+
+    parameters {
+        string( name: 'RELEASE_VERSION', description: 'Release Version to be deployed (e.g. release/1.1)' )
+        choice( name: 'ENVIRONMENT', choices: "Testing\nProduction", description: 'Environment where Mule Application will be deployed' )
+    //    choice( name: 'ASSET_TYPE', choices: "API\nIntegration", description: 'Type of  Mule Application (e.g. API or Integration)' )
+    //    string( name: 'API_VERSION', defaultValue: '1.0', description: 'Version of API Instance for pairing with Mule Application (e.g. 1.0)' )
+    //    string( name: 'CLIENT_APP', description: 'Name of the Client Application (e.g. Jenkins-Demo-OpenID)' )
+    }    
+
+    stages {
+
+        stage('Echo Version') {
+            when {
+                expression { params.RELEASE_VERSION.contains("bugfix") }
+            }
+            steps {
+                echo "POM_MAJOR_VERSION: ${env.POM_MAJOR_VERSION}"
+                echo "POM_MINOR_VERSION: ${env.POM_MINOR_VERSION}"
+                echo "POM_PATCH_VERSION: ${env.POM_PATCH_VERSION}"
+                echo "POM_MAVEN_QUALIFIER: ${env.POM_MAVEN_QUALIFIER}"
+                echo "VERSION_WITHOUT_BUILD_NUMBER: ${env.VERSION_WITHOUT_BUILD_NUMBER}"
+                echo "VERSION_BUILD_NUMBER: ${env.VERSION_BUILD_NUMBER}"
+            }
+        }
+
+        stage('Update Build Number & Set Maven Version') {
+            steps {
+                 sh '''sh scripts/bugfix-update-build-number-and-set-maven-version.sh'''
+            }
+        }
+
+        stage('Create Release Branch') {
+            steps {
+                sh "git checkout ${params.RELEASE_VERSION}"
+                sh '''sh scripts/create-release-branch.sh'''
+            }
+        }
+
+        stage('Commit to Release Branch') {
+            steps {
+                 sh '''sh scripts/commit-release-branch.sh'''
+            }
+        } 
+
+    }
+
+}

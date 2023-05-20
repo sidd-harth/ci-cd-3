@@ -1,0 +1,159 @@
+pipeline {
+    agent any
+
+    tools {
+        maven 'M386'
+    }
+
+    environment {
+        POM_VERSION         = sh(script: "mvn help:evaluate -Dexpression='project.version' -q -DforceStdout", returnStdout: true).trim()
+        POM_MAJOR_VERSION   = sh(script: "mvn help:evaluate -Dexpression='project.version' -q -DforceStdout |  cut -d. -f1", returnStdout: true).trim()
+        POM_MINOR_VERSION   = sh(script: "mvn help:evaluate -Dexpression='project.version' -q -DforceStdout |  cut -d. -f2", returnStdout: true).trim()
+        POM_PATCH_VERSION   = sh(script: "mvn help:evaluate -Dexpression='project.version' -q -DforceStdout |  cut -d. -f3 | cut -d- -f1", returnStdout: true).trim()
+        POM_MAVEN_QUALIFIER = sh(script: "mvn help:evaluate -Dexpression='project.version' -q -DforceStdout | cut -d- -f2", returnStdout: true).trim()
+        POM_SCM_URL         = sh(script: "mvn help:evaluate -Dexpression='project.scm.url' -q -DforceStdout", returnStdout: true).trim()
+    }
+
+    parameters {
+        string( name: 'RELEASE_VERSION', description: 'Release Version to be deployed (e.g. release/1.1)' )
+        choice( name: 'ENVIRONMENT', choices: "Testing\nProduction", description: 'Environment where Mule Application will be deployed' )
+    //    choice( name: 'ASSET_TYPE', choices: "API\nIntegration", description: 'Type of  Mule Application (e.g. API or Integration)' )
+    //    string( name: 'API_VERSION', defaultValue: '1.0', description: 'Version of API Instance for pairing with Mule Application (e.g. 1.0)' )
+    //    string( name: 'CLIENT_APP', description: 'Name of the Client Application (e.g. Jenkins-Demo-OpenID)' )
+    }    
+       
+    stages {
+
+        stage('Checkout Release') {
+            steps {
+                script {
+                    def githubUrl = env.POM_SCM_URL
+                    print "GitHub URL: " + githubUrl
+                    echo "Checking out Release from GitHub..."
+                    checkout scmGit(
+                            branches: [[name: "${params.RELEASE_VERSION}"]], 
+                            userRemoteConfigs: [[url: "${githubUrl}"]])
+                    }
+                echo "Checkout Release completed: ${currentBuild.currentResult}"
+            }
+        }
+
+        stage('Download from Artifactory') {
+            steps {
+                sh 'echo Download from Artifactory Success'
+            }
+        }
+
+        stage('Promote API - UAT') {
+            steps {
+                sh 'echo Promote API - UAT Success'
+            }
+        }
+
+        stage('Deploy to CH2 - UAT') {
+            steps {
+                sh 'echo Deploy to CH2 UAT Success'
+            }
+        }
+
+        stage('Integration Testing') {
+            steps {
+                sh 'echo Integration Testing Success'
+            }
+        }
+
+        stage('Regression Testing') {
+            steps {
+                sh 'echo Regression Testing Success'
+            }
+        }
+
+        stage('Feature Testing') {
+            steps {
+                sh 'echo Feature Testing Success'
+            }
+        }                        
+
+        stage('Smoke Testing') {
+            steps {
+                sh 'echo Smoke Testing Success'
+            }
+        } 
+
+        stage('Create Git Tag') {
+	            steps {	      		
+	                timeout(time: 15, unit: "DAYS") {
+	                    input message: 'Testing is Success. Do you want to create a gi tag for this release?', ok: 'Yes'
+	                }
+	            }
+	    }
+
+        stage('Create Git Tag') {
+            steps {
+                sh "git checkout ${params.RELEASE_VERSION}"
+                sh "git tag ${params.RELEASE_VERSION}"
+                sh "git push origin --tags"
+            }
+        }
+/*         stage('Check Maven Version') {
+            steps {
+                sh "sh scripts/check-maven-version-snapshot.sh"
+            }
+        }
+
+        stage('Build and Verify') {
+            steps {
+                sh 'echo Build and Verify Success'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+               sh 'echo SonarQube Analysis Success'
+            }
+        }
+
+        stage('SonarQube Quality Gate') {
+            steps {
+                sh 'echo SonarQube Quality Gate Success'
+            }
+        }
+
+        stage('Push Artefact to Exchange') {
+            steps {
+                sh 'echo Push Artefact to Exchange Success'
+            }
+        }
+
+        stage('Deploy to CH2') {
+            steps {
+                sh 'echo Deploy to CH2 Success'
+            }
+        }
+
+        stage('Push Artefact to Nexus') {
+            steps {
+                 sh 'echo Push Artefact to Nexus Success'
+            }
+        }        
+
+        stage('Update Incremental/Patch Version') {
+            steps {
+                 sh "git checkout develop"
+                 sh 'git pull'
+                 sh 'mvn build-helper:parse-version versions:set -DnewVersion=\\${parsedVersion.majorVersion}.\\${parsedVersion.minorVersion}.\\${parsedVersion.nextIncrementalVersion}-\\${parsedVersion.qualifier} versions:commit'
+            }
+        }
+
+        stage('Commit to Develop') {
+            steps {
+                 sh "git checkout develop" 
+                 sh "git add pom.xml"    
+                 sh 'git commit -m "Updated Patch/Incremental Version"'
+                 sh "git push origin"
+            }
+        } */
+
+    }
+
+}
