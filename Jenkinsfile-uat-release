@@ -76,7 +76,7 @@ pipeline {
             }
         } 
 
-        stage('Create Git Tag') {
+        stage('Generate Git Tag?') {
 	            steps {	      		
 	                timeout(time: 15, unit: "DAYS") {
 	                    input message: 'Testing is Success. Do you want to create a gi tag for this release?', ok: 'Yes'
