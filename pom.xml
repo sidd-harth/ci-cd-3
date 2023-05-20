@@ -4,10 +4,50 @@
 
 	<groupId>com.mycompany</groupId>
 	<artifactId>ci-cd-3</artifactId>
-	<version>3.2.0-SNAPSHOT</version>
+	<version>3.2.0-RC-2</version>
 	<packaging>mule-application</packaging>
 
 	<name>ci-cd-3</name>
+
+	<scm>
+		<url>https://github.com/sidd-harth/ci-cd-3.git</url>
+		<connection>scm:git:https://github.com/sidd-harth/ci-cd-3.git</connection>
+		<developerConnection>scm:git:https://github.com/sidd-harth/ci-cd-3.git</developerConnection>
+		<tag>1.0.0</tag>
+	</scm>
+
+	<profiles>
+		<profile>
+			<id>nexus-snapshot</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<repo-id>LocalNexusRepo</repo-id>
+				<repo-name>mule-sec-ops-MIXED</repo-name>
+				<repo-url>http://localhost:8888/repository/mule-sec-ops-MIXED/</repo-url>
+			</properties>
+		</profile>
+		<profile>
+			<id>nexus-release</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<repo-id>LocalNexusRepo</repo-id>
+				<repo-name>mule-sec-ops-release</repo-name>
+				<repo-url>http://localhost:8888/repository/mule-sec-ops-release/</repo-url>
+			</properties>
+		</profile>
+		<profile>
+			<id>exchange</id>
+			<properties>
+				<repo-id>Mule-Sec-Ops</repo-id>
+				<repo-name>Exchange Private Repository</repo-name>
+				<repo-url>https://maven.anypoint.mulesoft.com/api/v3/organizations/2bb670b7-914d-4c03-9cf3-74889d8836d1/maven</repo-url>
+			</properties>
+		</profile>
+	</profiles>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -15,10 +55,21 @@
 
 		<app.runtime>4.4.0-20220824</app.runtime>
 		<mule.maven.plugin.version>3.8.0</mule.maven.plugin.version>
+		<munit.version>2.3.13</munit.version>
 	</properties>
 
 	<build>
 		<plugins>
+		  <plugin>
+      <groupId>org.codehaus.mojo</groupId>
+      <artifactId>build-helper-maven-plugin</artifactId>
+      <version>3.2.0</version>
+  </plugin>
+  <plugin>
+      <groupId>org.codehaus.mojo</groupId>
+      <artifactId>versions-maven-plugin</artifactId>
+      <version>2.8.1</version>
+  </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-clean-plugin</artifactId>
@@ -29,9 +80,54 @@
 				<artifactId>mule-maven-plugin</artifactId>
 				<version>${mule.maven.plugin.version}</version>
 				<extensions>true</extensions>
+				<configuration>
+					<classifier>mule-application</classifier>
+					<cloudhub2Deployment>
+						<uri>https://anypoint.mulesoft.com </uri>
+						<provider>MC</provider>
+						<environment>dev</environment>
+						<target>Cloudhub-US-East-2</target>
+						<muleVersion>4.4.0</muleVersion>
+						<server>Mule-Sec-Ops</server>
+						<applicationName>${project.name}</applicationName>
+						<replicas>1</replicas>
+						<vCores>0.1</vCores>
+						<deploymentSettings>
+							<lastMileSecurity>false</lastMileSecurity>
+							<forwardSslSession>false</forwardSslSession>
+							<generateDefaultPublicUrl>true</generateDefaultPublicUrl>
+						</deploymentSettings>
+					</cloudhub2Deployment>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.owasp</groupId>
+				<artifactId>dependency-check-maven</artifactId>
+				<version>6.1.6</version>
+				<configuration>
+					<format>ALL</format>
+					<failBuildOnCVSS>8</failBuildOnCVSS>
+					<!-- fail the build for CVSS greater than or equal to 9 -->
+					<!-- use internal mirroring of CVE contents Suppress files E.g. a company-wide 
+						suppression file and local project file -->
+					<!-- <cveUrlModified>http://internal-mirror.mycorp.com/nvdcve-1.1-modified.json.gz</cveUrlModified> 
+						<cveUrlBase>http://internal-mirror.mycorp.com/nvdcve-1.1-%d.json.gz</cveUrlBase> 
+						<suppressionFiles> <suppressionFile>http://example.org/suppression.xml</suppressionFile> 
+						<suppressionFile>project-suppression.xml</suppressionFile> </suppressionFiles> -->
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.4.2</version>
+				<configuration>
+					<tagNameFormat>@{project.version}</tagNameFormat>
+					<!-- <autoVersionSubmodules>true</autoVersionSubmodules> <releaseProfiles>releases</releaseProfiles> -->
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
+
 
 	<dependencies>
 		<dependency>
@@ -48,9 +144,9 @@
 		</dependency>
 	</dependencies>
 
-	<repositories>
+<repositories>
 		<repository>
-			<id>anypoint-exchange-v3</id>
+			<id>Mule-Sec-Ops</id>
 			<name>Anypoint Exchange</name>
 			<url>https://maven.anypoint.mulesoft.com/api/v3/maven</url>
 			<layout>default</layout>
@@ -74,5 +170,12 @@
 			</snapshots>
 		</pluginRepository>
 	</pluginRepositories>
+	<distributionManagement>
+		<repository>
+			<id>${repo-id}</id>
+			<name>${repo-name}</name>
+			<url>${repo-url}</url>
+		</repository>
+	</distributionManagement>
 
 </project>

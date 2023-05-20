@@ -22,6 +22,13 @@ echo "VERSION_WITHOUT_BUILD_NUMBER: ${VERSION_WITHOUT_BUILD_NUMBER}"
 echo "VERSION_BUILD_NUMBER: ${VERSION_BUILD_NUMBER}"
 
 echo "------------------------------------------------------------"
+echo "DEBUG - Decrementing Build Number to get verious branch Number"
+echo "------------------------------------------------------------"
+
+DECREMENTED_BUILD_NUMBER=$(expr $VERSION_BUILD_NUMBER - "1")
+echo "Updated Build Number: $DECREMENTED_BUILD_NUMBER"
+
+echo "------------------------------------------------------------"
 echo "DEBUG - Create Release Branch"
 echo "------------------------------------------------------------"
 
@@ -29,7 +36,7 @@ if [[ $JOB_NAME == 'bugfix-release' ]]
 then
     git add pom.xml   
     git commit -m "Bugfix release for $POM_VERSION"
-    git checkout -b release/$MAJOR_VERSION.$MINOR_VERSION-${VERSION_BUILD_NUMBER} bugfix/$MAJOR_VERSION.$MINOR_VERSION;
+    git checkout -b release/$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION-${VERSION_BUILD_NUMBER} bugfix/$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION-$DECREMENTED_BUILD_NUMBER;
 elif [[ $JOB_NAME == 'prepare-hotfix' ]]
 then
     git checkout -b hotfix/$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION main;
@@ -37,8 +44,14 @@ elif [[ $JOB_NAME == 'prepare-minor-release' ]]
 then
     git checkout develop;
     git checkout -b release/$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION develop;
+elif [[ $JOB_NAME == 'build-release' ]]
+then
+    git add pom.xml   
+    git commit -m "Build Release RC-${VERSION_BUILD_NUMBER}";
+    git checkout -b release/$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION-${VERSION_BUILD_NUMBER} release/$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION;
 else
-    echo "Check Logs"
+    git checkout develop;
+    git checkout -b release/$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION develop;
 fi
 
 echo "============================================================"

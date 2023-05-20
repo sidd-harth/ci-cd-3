@@ -16,7 +16,7 @@ pipeline {
     }
 
     parameters {
-        string( name: 'BRANCH', description: 'Bugfix Branch to be released (e.g. bugfix/1.1.0-1)' )
+        string( name: 'BRANCH', description: 'Name of the Release Branch to be built? (e.g. release/1.1.0)' )
     }    
 
     stages {
@@ -37,6 +37,12 @@ pipeline {
                  sh '''sh scripts/bugfix-update-build-number-and-set-maven-version.sh'''
             }
         }
+
+        stage('Push Artefact to Nexus') {
+            steps {
+                 sh 'echo Push Artefact to Nexus Success'
+            }
+        } 
 
         stage('Create Release Branch') {
             steps {

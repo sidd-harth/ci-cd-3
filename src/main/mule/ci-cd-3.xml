@@ -4,5 +4,5 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
 	
-	<!-- feature/JIRA-456 -->
+	<!-- bugfix/3.2.0-1 -->
 	</mule>
