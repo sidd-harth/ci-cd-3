@@ -1,0 +1,62 @@
+pipeline {
+    agent any
+
+    tools {
+        maven 'M386'
+    }
+
+    environment {
+        POM_VERSION       = sh(script: "mvn help:evaluate -Dexpression='project.version' -q -DforceStdout", returnStdout: true).trim()
+        POM_MAJOR_VERSION = sh(script: "mvn help:evaluate -Dexpression='project.version' -q -DforceStdout |  cut -d. -f1", returnStdout: true).trim()
+        POM_MINOR_VERSION = sh(script: "mvn help:evaluate -Dexpression='project.version' -q -DforceStdout |  cut -d. -f2", returnStdout: true).trim()
+        POM_PATCH_VERSION = sh(script: "mvn help:evaluate -Dexpression='project.version' -q -DforceStdout |  cut -d. -f3 | cut -d- -f1", returnStdout: true).trim()
+        POM_MAVEN_QUALIFIER = sh(script: "mvn help:evaluate -Dexpression='project.version' -q -DforceStdout | cut -d- -f2", returnStdout: true).trim() 
+        VERSION_WITHOUT_BUILD_NUMBER = sh(script: "echo ${env.POM_MAJOR_VERSION}.${env.POM_MINOR_VERSION}.${env.POM_PATCH_VERSION}-${env.POM_MAVEN_QUALIFIER}", returnStdout: true).trim()
+        VERSION_BUILD_NUMBER = sh(script: "mvn help:evaluate -Dexpression='project.version' -q -DforceStdout | cut -d- -f3", returnStdout: true).trim()
+    }
+
+    parameters {
+        string( name: 'BRANCH', description: 'Name of the Release Branch to be built? (e.g. release/1.1.0)' )
+    }    
+
+    stages {
+
+        stage('Echo Version') {
+            steps {
+                echo "POM_MAJOR_VERSION: ${env.POM_MAJOR_VERSION}"
+                echo "POM_MINOR_VERSION: ${env.POM_MINOR_VERSION}"
+                echo "POM_PATCH_VERSION: ${env.POM_PATCH_VERSION}"
+                echo "POM_MAVEN_QUALIFIER: ${env.POM_MAVEN_QUALIFIER}"
+                echo "VERSION_WITHOUT_BUILD_NUMBER: ${env.VERSION_WITHOUT_BUILD_NUMBER}"
+                echo "VERSION_BUILD_NUMBER: ${env.VERSION_BUILD_NUMBER}"
+            }
+        }
+
+        stage('Update Build Number & Set Maven Version') {
+            steps {
+                 sh '''sh scripts/bugfix-update-build-number-and-set-maven-version.sh'''
+            }
+        }
+
+        stage('Push Artefact to Nexus') {
+            steps {
+                 sh 'echo Push Artefact to Nexus Success'
+            }
+        } 
+
+        stage('Create Release Branch') {
+            steps {
+                sh "git checkout ${params.BRANCH}"
+                sh '''sh scripts/create-release-branch.sh'''
+            }
+        }
+
+        stage('Commit to Release Branch') {
+            steps {
+                 sh '''sh scripts/commit-release-branch.sh'''
+            }
+        } 
+
+    }
+
+}
