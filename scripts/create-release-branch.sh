@@ -33,10 +33,14 @@ then
 elif [[ $JOB_NAME == 'prepare-hotfix' ]]
 then
     git checkout -b hotfix/$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION main;
-elif [[ $JOB_NAME == 'prepare-release' ]]
+elif [[ $JOB_NAME == 'prepare-minor-release' ]]
+then
+    git checkout develop;
+    git checkout -b release/$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION develop;
+elif [[ $JOB_NAME == 'build-release' ]]
 then
     git add pom.xml   
-    git commit -m "Preapre release for $POM_VERSION"
+    git commit -m "Build Release RC-${VERSION_BUILD_NUMBER}";
     git checkout -b release/$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION-${VERSION_BUILD_NUMBER} release/$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION;
 else
     git checkout develop;

@@ -43,6 +43,9 @@ then
     git add pom.xml;
     git commit -m "Prepare release RC-0";
     git push --set-upstream origin release/$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION; 
+elif [[ $JOB_NAME == 'build-release' ]]
+then
+    git push --set-upstream origin release/$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION-${VERSION_BUILD_NUMBER}; 
 else
     echo "Check Logs"
 fi
