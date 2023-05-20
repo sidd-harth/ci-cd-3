@@ -29,16 +29,18 @@ if [[ $JOB_NAME == 'bugfix-release' ]]
 then
     git add pom.xml   
     git commit -m "Bugfix release for $POM_VERSION"
-    git checkout -b release/$MAJOR_VERSION.$MINOR_VERSION-${VERSION_BUILD_NUMBER} bugfix/$MAJOR_VERSION.$MINOR_VERSION;
+    git checkout -b release/$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION-${VERSION_BUILD_NUMBER} bugfix/$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION;
 elif [[ $JOB_NAME == 'prepare-hotfix' ]]
 then
     git checkout -b hotfix/$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION main;
-elif [[ $JOB_NAME == 'prepare-minor-release' ]]
+elif [[ $JOB_NAME == 'prepare-release' ]]
 then
+    git add pom.xml   
+    git commit -m "Preapre release for $POM_VERSION"
+    git checkout -b release/$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION-${VERSION_BUILD_NUMBER} release/$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION;
+else
     git checkout develop;
     git checkout -b release/$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION develop;
-else
-    echo "Check Logs"
 fi
 
 echo "============================================================"
