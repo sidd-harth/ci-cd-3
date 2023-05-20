@@ -16,19 +16,12 @@ pipeline {
     }
 
     parameters {
-        string( name: 'RELEASE_VERSION', description: 'Release Version to be deployed (e.g. release/1.1)' )
-        choice( name: 'ENVIRONMENT', choices: "Testing\nProduction", description: 'Environment where Mule Application will be deployed' )
-    //    choice( name: 'ASSET_TYPE', choices: "API\nIntegration", description: 'Type of  Mule Application (e.g. API or Integration)' )
-    //    string( name: 'API_VERSION', defaultValue: '1.0', description: 'Version of API Instance for pairing with Mule Application (e.g. 1.0)' )
-    //    string( name: 'CLIENT_APP', description: 'Name of the Client Application (e.g. Jenkins-Demo-OpenID)' )
+        string( name: 'BRANCH', description: 'Bugfix Branch to be released (e.g. bugfix/1.1.0-1)' )
     }    
 
     stages {
 
         stage('Echo Version') {
-            when {
-                expression { params.RELEASE_VERSION.contains("bugfix") }
-            }
             steps {
                 echo "POM_MAJOR_VERSION: ${env.POM_MAJOR_VERSION}"
                 echo "POM_MINOR_VERSION: ${env.POM_MINOR_VERSION}"
@@ -47,7 +40,7 @@ pipeline {
 
         stage('Create Release Branch') {
             steps {
-                sh "git checkout ${params.RELEASE_VERSION}"
+                sh "git checkout ${params.BRANCH}"
                 sh '''sh scripts/create-release-branch.sh'''
             }
         }
