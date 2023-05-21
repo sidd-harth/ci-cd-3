@@ -50,7 +50,7 @@ pipeline {
 
         stage('Create HOTFIX Branch') {
             steps {
-                //sh "git checkout main"
+                sh "git checkout hotfix/${env.POM_MAJOR_VERSION}.${env.POM_MINOR_VERSION}.${env.POM_PATCH_VERSION}"
                 sh "sh scripts/create-release-branch.sh"
             }
         }
