@@ -22,6 +22,15 @@ echo "VERSION_WITHOUT_BUILD_NUMBER: ${VERSION_WITHOUT_BUILD_NUMBER}"
 echo "VERSION_BUILD_NUMBER: ${VERSION_BUILD_NUMBER}"
 
 echo "------------------------------------------------------------"
+echo "DEBUG - Decrementing Build Number to get verious branch Number"
+echo "------------------------------------------------------------"
+
+DECREMENTED_BUILD_NUMBER=$(expr $VERSION_BUILD_NUMBER - 1)
+DECREMENTED_PATCH_VERSION=$(expr $PATCH_VERSION - 1)
+echo "Updated Build Number: $DECREMENTED_BUILD_NUMBER"
+echo "Updated Patch Number: $DECREMENTED_PATCH_VERSION"
+
+echo "------------------------------------------------------------"
 echo "DEBUG - Commit to Release Branch"
 echo "------------------------------------------------------------"
 
@@ -33,10 +42,10 @@ then
     git push --set-upstream origin release/$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION-${VERSION_BUILD_NUMBER};  
 elif [[ $JOB_NAME == 'build-hotfix' ]]
 then
-    git add pom.xml;
-    git commit -m "Hotfix Release $POM_VERSION";
-    git checkout -b hotfix/$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION;
-    git push --set-upstream origin hotfix/$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION; 
+ #   git add pom.xml;
+ #   git commit -m "Hotfix Release $POM_VERSION-$MAVEN_QUALIFIER";
+ #   git checkout -b hotfix/$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION;
+    git push --set-upstream origin $POM_VERSION.$PATCH_VERSION; 
 elif [[ $JOB_NAME == 'prepare-minor-release' ]]
 then
     git checkout release/$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION;

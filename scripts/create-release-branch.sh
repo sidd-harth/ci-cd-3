@@ -25,8 +25,10 @@ echo "------------------------------------------------------------"
 echo "DEBUG - Decrementing Build Number to get verious branch Number"
 echo "------------------------------------------------------------"
 
-DECREMENTED_BUILD_NUMBER=$(expr $VERSION_BUILD_NUMBER - "1")
+DECREMENTED_BUILD_NUMBER=$(expr $VERSION_BUILD_NUMBER - 1)
+DECREMENTED_PATCH_VERSION=$(expr $PATCH_VERSION - 1)
 echo "Updated Build Number: $DECREMENTED_BUILD_NUMBER"
+echo "Updated Patch Number: $DECREMENTED_PATCH_VERSION"
 
 echo "------------------------------------------------------------"
 echo "DEBUG - Create Release Branch"
@@ -40,6 +42,11 @@ then
 elif [[ $JOB_NAME == 'prepare-hotfix' ]]
 then
     git checkout -b hotfix/$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION main;
+elif [[ $JOB_NAME == 'build-hotfix' ]]
+then
+    git add pom.xml;
+    git commit -m "Hotfix Release $POM_VERSION";
+    git checkout -b $POM_VERSION.$PATCH_VERSION hotfix/$MAJOR_VERSION.$MINOR_VERSION.$DECREMENTED_PATCH_VERSION;
 elif [[ $JOB_NAME == 'prepare-minor-release' ]]
 then
     git checkout develop;

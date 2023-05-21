@@ -15,6 +15,10 @@ pipeline {
        
     stages {
 
+/////////////////
+///////////////
+////////// ADD a stage to check if pom vbersion has RC in it, if not fail/stop build 
+
         stage('Echo Version') {
             steps {
                 echo "POM_MAJOR_VERSION: ${env.POM_MAJOR_VERSION}"
@@ -45,13 +49,14 @@ pipeline {
             }
         }
 
-        stage('Create Git Tag') {
+/* lets do this in JENKINSFILE-PROD-RELEASE
+         stage('Create Git Tag') {
             steps {
                 sh "git checkout main"
                 sh "git tag ${env.POM_MAJOR_VERSION}.${env.POM_MINOR_VERSION}.${env.POM_PATCH_VERSION}"
                 sh "git push origin --tags"
             }
-        } 
+        }  */
 
     }
 
