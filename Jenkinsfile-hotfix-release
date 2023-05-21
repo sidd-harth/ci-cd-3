@@ -16,7 +16,7 @@ pipeline {
     }
 
     parameters {
-        string( name: 'RELEASE_VERSION', description: 'Hotfix Version to be deployed (e.g. hotfix/1.1.0)' )
+        string( name: 'BRANCH', description: 'Hotfix Version to be built? (e.g. hotfix/1.1.0)' )
         choice( name: 'ENVIRONMENT', choices: "Testing\nProduction", description: 'Environment where Mule Application will be deployed' )
     //    choice( name: 'ASSET_TYPE', choices: "API\nIntegration", description: 'Type of  Mule Application (e.g. API or Integration)' )
     //    string( name: 'API_VERSION', defaultValue: '1.0', description: 'Version of API Instance for pairing with Mule Application (e.g. 1.0)' )
